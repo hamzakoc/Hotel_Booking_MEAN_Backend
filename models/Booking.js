@@ -5,13 +5,13 @@ const BookingSchema = new mongoose.Schema({
     listing_id: {
         type: String,
         required: [true, 'Enter listing id'],
-        unique: [true, "Id exist"],
+      
     },
 
     booking_id: {
         type: String,
         required: [true, 'Enter booking id'],
-        unique: [true, "Id exist"],
+     
     },
 
 

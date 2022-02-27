@@ -1,7 +1,8 @@
 const User = require('./models/User');
 const Listing = require('./models/Listing');
 const Booking = require('./models/Booking');
-
+const bcrypt = require("bcryptjs")
+const jwt = require("jsonwebtoken")
 
 exports.resolvers = {
     Query: {
@@ -12,8 +13,15 @@ exports.resolvers = {
         getListing: async (parent, args) => {
             return await Listing.find({});
         },
+
         getBooking: async (parent, args) => {
             return await Booking.find({});
+        },
+
+
+
+        getListingCreatedByAdmin: async (parent, args) => {
+            return await Listing.find({ "type": args.type });
         },
 
 
@@ -34,31 +42,128 @@ exports.resolvers = {
         getBookingByID: async (parent, args) => {
             return await Booking.findById(args.id);
         },
+
+
+        userLoggedInBooking: async (parent, { username, password }) => {
+
+            const user = await User.findOne({ username: username });
+
+
+            if (!user) {
+                throw new Error('User does not exist!');
+            }
+
+            const passwordDB = user.password;
+
+            if (passwordDB != password) {
+                throw new Error('Password is incorrect!');
+            }
+
+
+            return await Booking.find({ "username": user });
+        },
+
+
+        adminLoggedInListing: async (parent, { username }) => {
+
+            const admin = await Listing.find({ username: username });
+
+            if (!admin) {
+                throw new Error('Admin does not exist!');
+            }
+
+            return await Listing.find({ "username": admin })
+        },
+
+
     },
 
     Mutation: {
 
         // ***********************User Start***************************
-        addUser: async (parent, args) => {
-            console.log(args)
+        addUser: async (parent, { username, firstname, lastname, email, password, type }) => {
+
             const emailExpression = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
-            const isValidEmail = emailExpression.test(String(args.email).toLowerCase())
+            const isValidEmail = emailExpression.test(email.toLowerCase())
 
             if (!isValidEmail) {
                 throw new Error("Email is not valid")
             }
 
+            const oldUser = await User.findOne({ email })
+            if (oldUser) {
+                throw new Error(`${email} already exist`)
+            }
+
+
             let newUser = new User({
-                username: args.username,
-                firstname: args.firstname,
-                lastname: args.lastname,
-                password: args.password,
-                email: args.email,
-                type: args.type,
+                username: username,
+                firstname: firstname,
+                lastname: lastname,
+                password: password,
+                email: email.toLowerCase(),
+                type: type,
             });
+
+            const token = jwt.sign(
+                { user_id: newUser._id, email, username },
+                "UNSAFE_STRING",
+                {
+                    expiresIn: "1h"
+                }
+
+            )
+
+            newUser.token = token
+
+
             return await newUser.save();
         },
 
+        userLoggedIn: async (parent, { username, password }) => {
+
+            const user = await User.findOne({ username: username });
+
+            if (!user) {
+                throw new Error('User does not exist!');
+            }
+
+            const passwordDB = user.password;
+            console.log(passwordDB)
+            console.log(password)
+
+
+            if (passwordDB != password) {
+                throw new Error('Password is incorrect!');
+            }
+
+            const token = jwt.sign(
+                { userId: user.id, username: user.username },
+                'somesupersecretkey',
+                {
+                    expiresIn: '1h'
+                }
+            );
+            return { userId: user.id, username: user.username, password: user.password, token: token, tokenExpiration: 1 };
+        },
+
+        adminLoggedIn: async (parent, { username }) => {
+
+            const user = await Listing.findOne({ username: username });
+
+            if (!user) {
+                throw new Error('User does not exist!');
+            }
+
+            const token = jwt.sign(
+                { userId: user.id, username: user.username },
+                'somesupersecretkey',
+                {
+                    expiresIn: '1h'
+                }
+            );
+            return { userId: user.id, username: user.username, token: token, tokenExpiration: 1 };
+        },
 
         updateUser: async (parent, args) => {
             console.log(args)
@@ -74,9 +179,17 @@ exports.resolvers = {
                         username: args.username,
                         firstname: args.firstname,
                         lastname: args.lastname,
-                        password: args.password,
-                        email: args.email,
-                        type: args.type,
+                        password: await bcryct.hash(password, 10),
+                        email: email,
+                        type: type,
+                        token: jwt.sign(
+                            { user_id: newUser._id, email, username },
+                            "UNSAFE_STRING",
+                            {
+                                expiresIn: "1h"
+                            }
+
+                        )
                     }
                 }, { new: true }, (err, user) => {
                     if (err) {
@@ -123,7 +236,21 @@ exports.resolvers = {
                 username: args.username,
                 type: args.type,
                 created: args.created,
+                token: args.token
             });
+
+
+            const token = jwt.sign(
+                { user_id: newListing._id },
+                "UNSAFE_STRING",
+                {
+                    expiresIn: "1h"
+                }
+
+            )
+
+            newListing.token = token
+
             return await newListing.save();
         },
 
@@ -150,6 +277,7 @@ exports.resolvers = {
                         username: args.user_id,
                         type: args.type,
                         created: args.created,
+                        token: args.token
                     }
                 }, { new: true }, (err, listing) => {
                     if (err) {

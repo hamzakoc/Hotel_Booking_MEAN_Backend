@@ -48,7 +48,11 @@ const UserSchema = new mongoose.Schema({
 
     type: {
         type: String,
-        default:'customer',
+        default: 'customer',
+    },
+
+    token: {
+        type: String
     }
 
 });

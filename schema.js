@@ -5,6 +5,7 @@ exports.typeDefs = gql`
     type User {
         username: String!
         password: String!
+        token:String
     }
         
     type Listing {
@@ -19,6 +20,7 @@ exports.typeDefs = gql`
         username:String!
         type:String!
         created:String!
+        token:String
     }  
 
     type Booking {
@@ -30,11 +32,20 @@ exports.typeDefs = gql`
         username:String!
     }
 
+    type AuthData{
+        username:String!
+        password:String!
+        token:String
+        tokenExpriration:String
+    }
 
     type Query {
       getUser:[User]
       getListing: [Listing]
-      getBooking:[Booking]
+      getBooking(listing_id:String):[Booking]
+      getBookingEvent:[Booking]
+
+      getListingCreatedByAdmin(type: String!): [Listing]
 
       getListingByName(listing_title: String!): [Listing]
       getListingByCity(city: String!): [Listing]
@@ -43,11 +54,26 @@ exports.typeDefs = gql`
       getListingByID(id: ID!): Listing
       getBookingByID(id: ID!): Booking
 
+      userLoggedInBooking(username:String, password:String):Booking
+      adminLoggedInListing(username:String):Listing
+
+
     }
 
 
     type Mutation {
-          
+
+        userLoggedIn(
+            username: String
+            password: String
+            token:String
+        ): AuthData
+
+        adminLoggedIn(
+            username: String
+            password: String
+            token:String
+        ): AuthData
 
         addUser(
             username: String!
@@ -56,6 +82,7 @@ exports.typeDefs = gql`
             password: String!
             email: String!
             type:String
+            token:String
          ):User
       
          updateUser(
@@ -65,13 +92,14 @@ exports.typeDefs = gql`
             password: String!
             email: String!
             type:String
+            token:String
         ):User 
 
         deleteUser(
             id: ID!
         ): User
 
-
+      
 
         addListing(
             listing_id: String!
@@ -85,6 +113,7 @@ exports.typeDefs = gql`
             username:String!
             type:String
             created:String!
+            token:String
          ): Listing
      
          updateListing(
@@ -98,7 +127,8 @@ exports.typeDefs = gql`
             email: String!
             username:String!
             type:String
-            created:String!         
+            created:String!
+            token:String         
          ): Listing
       
          deleteListing(

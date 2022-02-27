@@ -6,7 +6,6 @@ const ListingSchema = new mongoose.Schema({
     listing_id: {
         type: String,
         required: [true, 'Please enter listing Id'],
-        unique: [true, "Id exist"],
         trim: true,
         lowercase: true
     },
@@ -65,7 +64,6 @@ const ListingSchema = new mongoose.Schema({
     email: {
         type: String,
         required: [true, 'Please enter email'],
-        unique: [true, "Email should be unique"],
         trim: true,
         uppercase: true,
         validate: function (value) {
@@ -90,6 +88,10 @@ const ListingSchema = new mongoose.Schema({
     created: {
         type: Date,
         default: Date.now
+    },
+
+    token: {
+        type: String
     }
 
 
