@@ -33,14 +33,25 @@ exports.resolvers = {
         },
 
 
+
+
         getUserByID: async (parent, args) => {
             return await User.findById(args.id);
         },
+
+        getUserByUsername: async (parent, args) => {
+            return await User.find({ "username": args.username });
+        },
+
         getListingByID: async (parent, args) => {
             return await Listing.findById(args.id);
         },
         getBookingByID: async (parent, args) => {
             return await Booking.findById(args.id);
+        },
+
+        getBookingByUsername: async (parent, args) => {
+            return await Booking.find({ "username": args.username })
         },
 
 

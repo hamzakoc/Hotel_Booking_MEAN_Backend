@@ -3,23 +3,29 @@ const { gql } = require('apollo-server-express');
 exports.typeDefs = gql`
 
     type User {
+        id: ID!
         username: String!
+        firstname:String!
+        lastname:String!
+        email:String!
         password: String!
         token:String
+        type:String
     }
         
     type Listing {
-        listing_id: String!
-        listing_title: String!
-        description: String!
-        street: String!
-        city: String!
-        postal_code: String!
-        price: Float!
-        email: String!
-        username:String!
-        type:String!
-        created:String!
+        id: ID
+        listing_id: String
+        listing_title: String
+        description: String
+        street: String
+        city: String
+        postal_code: String
+        price: String
+        email: String
+        username:String
+        type:String
+        created:String
         token:String
     }  
 
@@ -42,17 +48,22 @@ exports.typeDefs = gql`
     type Query {
       getUser:[User]
       getListing: [Listing]
-      getBooking(listing_id:String):[Booking]
-      getBookingEvent:[Booking]
+      getBooking:[Booking]
+      
 
       getListingCreatedByAdmin(type: String!): [Listing]
 
       getListingByName(listing_title: String!): [Listing]
       getListingByCity(city: String!): [Listing]
+      
+
 
       getUserByID(id: ID!): User
+      getUserByUsername(username: String!): [User]
       getListingByID(id: ID!): Listing
       getBookingByID(id: ID!): Booking
+      getBookingByUsername(username: String!): [Booking]
+
 
       userLoggedInBooking(username:String, password:String):Booking
       adminLoggedInListing(username:String):Listing
@@ -76,11 +87,11 @@ exports.typeDefs = gql`
         ): AuthData
 
         addUser(
-            username: String!
-            firstname: String!
-            lastname: String!
-            password: String!
-            email: String!
+            username: String
+            firstname: String
+            lastname: String
+            password: String
+            email: String
             type:String
             token:String
          ):User
@@ -102,17 +113,17 @@ exports.typeDefs = gql`
       
 
         addListing(
-            listing_id: String!
-            listing_title: String!
-            description:String!
-            street: String!
-            city: String!
-            postal_code: String!
-            price: Float!
-            email: String!
-            username:String!
+            listing_id: String
+            listing_title: String
+            description:String
+            street: String
+            city: String
+            postal_code: String
+            price: String
+            email: String
+            username:String
             type:String
-            created:String!
+            created:String
             token:String
          ): Listing
      
@@ -123,7 +134,7 @@ exports.typeDefs = gql`
             street: String!
             city: String!
             postal_code: String!
-            price: Float!
+            price: String!
             email: String!
             username:String!
             type:String

@@ -39,7 +39,7 @@ const BookingSchema = new mongoose.Schema({
 
     username: {
         type: String,
-        required: [true, 'Enter start username'],
+        required: [true, 'Enter username'],
 
     }
 

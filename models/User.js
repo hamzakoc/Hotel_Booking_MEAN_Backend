@@ -25,7 +25,7 @@ const UserSchema = new mongoose.Schema({
 
     password: {
         type: String,
-        required: [true, 'Enter your password'],
+        required: [true, 'Password is Not Valid. Min lenght 6'],
         minlength: 6,
         lowercase: true,
         uppercase: true,
@@ -39,7 +39,6 @@ const UserSchema = new mongoose.Schema({
         required: [true, 'Enter your email'],
         unique: [true, "Email already exist"],
         trim: true,
-        uppercase: true,
         validate: function (value) {
             var emailRegex = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
             return emailRegex.test(value);
@@ -48,7 +47,6 @@ const UserSchema = new mongoose.Schema({
 
     type: {
         type: String,
-        default: 'customer',
     },
 
     token: {
